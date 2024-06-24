@@ -29,7 +29,7 @@ class MainActivity : AppCompatActivity() {
 
         binding.recyclerView.adapter = adapter
         binding.recyclerView.layoutManager = GridLayoutManager(this, 2)
-        searchByName("super")
+        searchByName("bat")
 
     }
 
