@@ -3,7 +3,9 @@ package com.example.superheros.adapters
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.example.superheros.data.Superhero
 import com.example.superheros.databinding.ItemSuperheroBinding
+import com.squareup.picasso.Picasso
 
 class SuperheroAdapter (private var dataSet : List <Superhero>) : RecyclerView.Adapter<SuperheroViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SuperheroViewHolder {
@@ -28,8 +30,9 @@ class SuperheroAdapter (private var dataSet : List <Superhero>) : RecyclerView.A
 class SuperheroViewHolder (private val binding: ItemSuperheroBinding) : RecyclerView.ViewHolder(binding.root) {
 
     //Método para pintar la vista
-    fun render (superhero:Superhero) {
+    fun render (superhero : Superhero) {
         binding.nameTextView.text = superhero.name
+        Picasso.get().load(superhero.image.url).into(binding.avatarImageView)
     }
 
 }
