@@ -7,7 +7,7 @@ import com.example.superheros.data.Superhero
 import com.example.superheros.databinding.ItemSuperheroBinding
 import com.squareup.picasso.Picasso
 
-class SuperheroAdapter (private var dataSet : List <Superhero>) : RecyclerView.Adapter<SuperheroViewHolder>() {
+class SuperheroAdapter (private var dataSet : List <Superhero>): RecyclerView.Adapter<SuperheroViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SuperheroViewHolder {
         val binding = ItemSuperheroBinding.inflate(LayoutInflater.from(parent.context))
         return SuperheroViewHolder(binding)
@@ -17,6 +17,7 @@ class SuperheroAdapter (private var dataSet : List <Superhero>) : RecyclerView.A
 
     override fun onBindViewHolder(holder: SuperheroViewHolder, position: Int) {
         holder.render(dataSet[position])
+
 
     }
 
