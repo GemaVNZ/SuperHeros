@@ -16,4 +16,4 @@ data class Superhero (
 
 }
 data class Image (
-    @SerializedName ("") val url : String)
+    @SerializedName ("url") val url : String)

@@ -4,10 +4,12 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
+import android.view.View
 import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.superheros.R
 import com.example.superheros.adapters.SuperheroAdapter
+import com.example.superheros.data.Superhero
 import com.example.superheros.data.SuperheroAPIService
 import com.example.superheros.databinding.ActivityMainBinding
 import kotlinx.coroutines.CoroutineScope
@@ -20,16 +22,19 @@ class MainActivity : AppCompatActivity() {
 
     lateinit var binding: ActivityMainBinding
     lateinit var adapter : SuperheroAdapter
+
+    var superheroList = listOf<Superhero>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        adapter = SuperheroAdapter(emptyList())
-
+        adapter = SuperheroAdapter(superheroList)
         binding.recyclerView.adapter = adapter
         binding.recyclerView.layoutManager = GridLayoutManager(this, 2)
-        searchByName("bat")
+
+        updateView(superheroList)
+        searchByName("")
 
     }
 
@@ -55,6 +60,22 @@ class MainActivity : AppCompatActivity() {
         return true
 
     }
+    private fun updateSuperheroList(newSuperheroList: List<Superhero>) {
+        superheroList = newSuperheroList
+        adapter.updateData(superheroList)
+        updateView(superheroList)
+    }
+
+    private fun updateView(dataList: List<Superhero>) {
+        if (dataList.isEmpty()) {
+            binding.recyclerView.visibility = View.GONE
+            binding.messageView.visibility = View.VISIBLE
+        } else {
+            binding.recyclerView.visibility = View.VISIBLE
+            binding.messageView.visibility = View.GONE
+        }
+    }
+
 
     private fun searchByName (query:String) {
         //Llamada al segundo hilo
@@ -64,16 +85,13 @@ class MainActivity : AppCompatActivity() {
 
                 runOnUiThread {
                     if (result.response == "success") {
-                        adapter.updateData(result.results)
+                        updateSuperheroList(result.results)
                     } else {
-                        adapter.updateData(emptyList())
+                        updateSuperheroList(emptyList())
                     }
                 }
+            }
         }
-
-        }
-
-
     private fun getRetrofit() : Retrofit {
         return Retrofit.Builder()
             .baseUrl("https://superheroapi.com/api/7252591128153666/")

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">SuperHeros</string>
+    <string name="app_name">SuperHeroes</string>
 
     <string name="menu_search">Search</string>
 </resources>
