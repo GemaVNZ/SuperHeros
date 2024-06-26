@@ -2,12 +2,14 @@ package com.example.superheros.adapters
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.AdapterView.OnItemClickListener
 import androidx.recyclerview.widget.RecyclerView
 import com.example.superheros.data.Superhero
 import com.example.superheros.databinding.ItemSuperheroBinding
 import com.squareup.picasso.Picasso
 
-class SuperheroAdapter (private var dataSet : List <Superhero>): RecyclerView.Adapter<SuperheroViewHolder>() {
+class SuperheroAdapter (private var dataSet : List <Superhero> = emptyList(), private val onItemClickListener:(Int) -> Unit ): RecyclerView.Adapter<SuperheroViewHolder>() {
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SuperheroViewHolder {
         val binding = ItemSuperheroBinding.inflate(LayoutInflater.from(parent.context))
         return SuperheroViewHolder(binding)
@@ -17,11 +19,12 @@ class SuperheroAdapter (private var dataSet : List <Superhero>): RecyclerView.Ad
 
     override fun onBindViewHolder(holder: SuperheroViewHolder, position: Int) {
         holder.render(dataSet[position])
-
-
+        holder.itemView.setOnClickListener{
+            onItemClickListener(holder.adapterPosition)
+        }
     }
 
-    fun updateData(dataSet : List<Superhero>) {
+    fun updateData(dataSet: List<Superhero>) {
         this.dataSet = dataSet
         notifyDataSetChanged()
     }
