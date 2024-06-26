@@ -12,35 +12,38 @@ import com.example.superheros.R
 import com.example.superheros.adapters.SuperheroAdapter
 import com.example.superheros.data.Superhero
 import com.example.superheros.data.SuperheroAPIService
+import com.example.superheros.data.SuperheroResponse
 import com.example.superheros.databinding.ActivityMainBinding
 import com.example.superheros.utils.RetrofitProvider
+import com.google.ai.client.generativeai.type.content
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    private lateinit var adapter : SuperheroAdapter
+    private lateinit var adapter: SuperheroAdapter
 
-    private  var superheroList : List<Superhero> = emptyList()
+    private var superheroList: List<Superhero> = emptyList()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        adapter = SuperheroAdapter(superheroList) {
-            position -> navigateToDetail (superheroList[position])
+        adapter = SuperheroAdapter(superheroList) { position ->
+            navigateToDetail(superheroList[position])
 
         }
         binding.recyclerView.adapter = adapter
         binding.recyclerView.layoutManager = GridLayoutManager(this, 2)
 
-        //updateView(superheroList)
-        searchByName("")
+
+//binding.content.progress.visibility = View.VISIBLE
 
     }
 
@@ -53,7 +56,7 @@ class MainActivity : AppCompatActivity() {
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 query?.let {
-                    searchByName (it)
+                    findSuperHeroByName(it)
                 }
                 return true
             }
@@ -69,10 +72,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun navigateToDetail(superhero: Superhero) {
         //Toast.makeText(this, superhero.name, Toast.LENGTH_LONG).show()
-        val intent = Intent (this, DetailActivity::class.java)
-        intent.putExtra("SUPERHERO_ID",superhero.id)
-        intent.putExtra("SUPERHERO_NAME",superhero.name)
-        intent.putExtra("SUPERHERO_IMAGE",superhero.image.url)
+        val intent = Intent(this, DetailActivity::class.java)
+        intent.putExtra("SUPERHERO_ID", superhero.id)
+        intent.putExtra("SUPERHERO_NAME", superhero.name)
+        intent.putExtra("SUPERHERO_IMAGE", superhero.image.url)
         startActivity(intent)
 
     }
@@ -95,22 +98,52 @@ class MainActivity : AppCompatActivity() {
     } */
 
 
-    private fun searchByName (query:String) {
+    private fun findSuperHeroByName(query: String) {
+
+        //binding.content.progress.visibility = View.VISIBLE
 
         val service: SuperheroAPIService = RetrofitProvider.getRetrofit()
-
         //Llamada al segundo hilo
         CoroutineScope(Dispatchers.IO).launch {
-                val response = service.findSuperHeroByName(query)
+            try {
+                val response: Response<SuperheroResponse> = service.findSuperHeroByName(query)
                 runOnUiThread {
-                    if (response.body() != null) {
-                        superheroList = response.body()?.results.orEmpty()
+                    //binding.content.progress.visibility = View.GONE
+                    if (response.isSuccessful) {
+                        val superheroResponse = response.body()
+
+                        if (superheroResponse != null) {
+
+                            superheroList = superheroResponse.results.orEmpty()
+                        } else {
+                            superheroList = emptyList()
+                            Toast.makeText(
+                                this@MainActivity,
+                                "Respuesta nula del servidor",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+
                     } else {
                         superheroList = emptyList()
+                       // Toast.makeText(
+                            //this@MainActivity
+                            //"Error en la solicitud: ${response.code}",
+                            //Toast.LENGTH_SHORT
+                        //).show()
                     }
+
                     adapter.updateData(superheroList)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                runOnUiThread {
+                    //binding.content.progress.visibility = View.GONE
+                    // Puedes mostrar un mensaje de error genérico al usuario si ocurre una excepción
+                    Toast.makeText(this@MainActivity, "Error: ${e.message}", Toast.LENGTH_SHORT)
+                        .show()
                 }
             }
         }
-
+    }
 }
