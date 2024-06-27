@@ -1,6 +1,10 @@
 package com.example.superheros.data
 
+import com.google.gson.TypeAdapter
+import com.google.gson.annotations.JsonAdapter
 import com.google.gson.annotations.SerializedName
+import com.google.gson.stream.JsonReader
+import com.google.gson.stream.JsonWriter
 
 data class SuperheroResponse(
 
@@ -10,7 +14,7 @@ data class SuperheroResponse(
 }
 
 data class Superhero (
-    @SerializedName("id") val id:String,
+    @SerializedName("id") val id:Int,
     @SerializedName("name") val name: String,
     @SerializedName("work") val work : Work,
     @SerializedName("powerstats") val stats : Stats,
@@ -21,8 +25,8 @@ data class Superhero (
 
 data class Biography (
     @SerializedName("full-name") val realName:String,
-    //@SerializedName ("aliases") val aliases:String,
-    @SerializedName ("place-of-birth") val placebirth:String,
+    //@SerializedName ("aliases") val aliases:List<String>,
+    @SerializedName ("placebirth") val placebirth:String,
     @SerializedName("alignment") val alignment:String,
     @SerializedName ("publisher") val publisher:String ) {
 
@@ -30,19 +34,37 @@ data class Biography (
 }
 
 data class Stats(
-    @SerializedName("intelligence") val intelligence:Int,
-    @SerializedName ("strength") val strength:Int,
-    @SerializedName ("speed") val speed:Int,
-    @SerializedName("durability") val durability:Int,
-    @SerializedName ("power") val power:Int,
-    @SerializedName("combat") val combat:Int){
+    @JsonAdapter(IntegerAdapter::class) @SerializedName("intelligence") val intelligence: Int,
+    @JsonAdapter(IntegerAdapter::class) @SerializedName("strength") val strength: Int,
+    @JsonAdapter(IntegerAdapter::class) @SerializedName("speed") val speed: Int,
+    @JsonAdapter(IntegerAdapter::class) @SerializedName("durability") val durability: Int,
+    @JsonAdapter(IntegerAdapter::class) @SerializedName("power") val power: Int,
+    @JsonAdapter(IntegerAdapter::class) @SerializedName("combat") val combat: Int){
 
 }
 
 data class Work(
     @SerializedName("occupation") val occupation:String,
-    @SerializedName ("base-of-operation") val base:String) {
+    @SerializedName ("base") val base:String) {
 }
 
 data class Image (
-    @SerializedName ("url") val url : String)
+    @SerializedName ("url") val url : String) {
+
+}
+
+class IntegerAdapter : TypeAdapter<Int>() {
+    override fun write(out: JsonWriter?, value: Int) {
+        out?.value(value)
+    }
+
+    override fun read(`in`: JsonReader?): Int {
+        if (`in` != null) {
+            val value: String = `in`.nextString()
+            if (value != "null") {
+                return value.toInt()
+            }
+        }
+        return 0
+    }
+}

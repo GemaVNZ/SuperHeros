@@ -7,9 +7,9 @@ import retrofit2.http.Path
 
 interface SuperheroAPIService {
     @GET ("search/{name}")
-    suspend fun findSuperHeroByName(@Path("name") query : String) : Response<SuperheroResponse>
+    suspend fun findSuperHeroByName(@Path("name") query : String) : SuperheroResponse
 
     @GET ("{character-id}")
-    suspend fun getSuperHeroById(@Path("character-id") id : Int) : Response<SuperheroResponse>
+    suspend fun getSuperHeroById(@Path("character-id") id : Int) : Superhero
 
 }

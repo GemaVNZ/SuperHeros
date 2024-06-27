@@ -4,7 +4,6 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
-import android.view.View
 import android.widget.Toast
 import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.GridLayoutManager
@@ -12,16 +11,11 @@ import com.example.superheros.R
 import com.example.superheros.adapters.SuperheroAdapter
 import com.example.superheros.data.Superhero
 import com.example.superheros.data.SuperheroAPIService
-import com.example.superheros.data.SuperheroResponse
 import com.example.superheros.databinding.ActivityMainBinding
 import com.example.superheros.utils.RetrofitProvider
-import com.google.ai.client.generativeai.type.content
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 
 class MainActivity : AppCompatActivity() {
 
@@ -72,6 +66,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun navigateToDetail(superhero: Superhero) {
         //Toast.makeText(this, superhero.name, Toast.LENGTH_LONG).show()
+
+
         val intent = Intent(this, DetailActivity::class.java)
         intent.putExtra("SUPERHERO_ID", superhero.id)
         intent.putExtra("SUPERHERO_NAME", superhero.name)
@@ -100,37 +96,23 @@ class MainActivity : AppCompatActivity() {
 
     private fun findSuperHeroByName(query: String) {
 
-        //binding.content.progress.visibility = View.VISIBLE
-
         val service: SuperheroAPIService = RetrofitProvider.getRetrofit()
         //Llamada al segundo hilo
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val response: Response<SuperheroResponse> = service.findSuperHeroByName(query)
+                val result = service.findSuperHeroByName(query)
                 runOnUiThread {
-                    //binding.content.progress.visibility = View.GONE
-                    if (response.isSuccessful) {
-                        val superheroResponse = response.body()
 
-                        if (superheroResponse != null) {
-
-                            superheroList = superheroResponse.results.orEmpty()
-                        } else {
-                            superheroList = emptyList()
-                            Toast.makeText(
-                                this@MainActivity,
-                                "Respuesta nula del servidor",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
+                    if (result.response == "success") {
+                        superheroList = result.results
 
                     } else {
                         superheroList = emptyList()
-                       // Toast.makeText(
-                            //this@MainActivity
-                            //"Error en la solicitud: ${response.code}",
-                            //Toast.LENGTH_SHORT
-                        //).show()
+                       Toast.makeText(
+                            this@MainActivity,
+                            "Error en la solicitud",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
 
                     adapter.updateData(superheroList)
@@ -138,7 +120,7 @@ class MainActivity : AppCompatActivity() {
             } catch (e: Exception) {
                 e.printStackTrace()
                 runOnUiThread {
-                    //binding.content.progress.visibility = View.GONE
+
                     // Puedes mostrar un mensaje de error genérico al usuario si ocurre una excepción
                     Toast.makeText(this@MainActivity, "Error: ${e.message}", Toast.LENGTH_SHORT)
                         .show()
